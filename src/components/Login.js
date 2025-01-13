@@ -8,7 +8,7 @@ const Login = () => {
 
   const [isSignInForm,SetIsSignForm]=useState(true);
   const [errorMessage,setErrorMessage]=useState(null)
-  const navigate=useNavigate;
+  const navigate=useNavigate();
   
   const email=useRef(null);
   const password=useRef(null)

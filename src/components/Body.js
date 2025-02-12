@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { addUser, removeUser } from '../utils/userSlice';
 
 const Body = () => {
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
 
   const appRouter = createBrowserRouter([
     {
@@ -21,26 +21,22 @@ const Body = () => {
     },
   ]);
 
-  useEffect(()=>{
+  useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-      
-        const {uid,email,displayName} = user;
-        dispatch(addUser({uid:uid,email:email,displayName:displayName}))
-  
-        // ...
-      } else { 
-        dispatch(removeUser())
-        // User is signed out
-        // ...
+        const { uid, email, displayName, photoURL } = user;
+        dispatch(addUser({ uid, email, displayName, photoURL }));
+      } else {
+        dispatch(removeUser());
       }
     });
-  
-  },[])
+  }, [dispatch]); // Added `dispatch` to the dependency array to avoid the warning
+
   return (
     <div>
       <RouterProvider router={appRouter} />
     </div>
   );
 };
+
 export default Body;

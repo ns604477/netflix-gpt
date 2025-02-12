@@ -1,17 +1,39 @@
-import { signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { addUser, removeUser } from "../utils/userSlice";
+
 
 const Header = () => {
-  const navigate = useNavigate();  // Corrected by adding parentheses
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((store) => store.user);
 
   const handleSignOut = () => {
-    signOut(auth).then(() => {
-      navigate("/");  // Redirect to home after sign out
-    }).catch((error) => {
-      navigate("/error");  // Redirect to error page if sign out fails
+    signOut(auth)
+      .then(() => {})
+      .catch((error) => {
+        navigate("/error"); // Redirect to error page if sign out fails
+      });
+  };
+
+  useEffect(() => {
+    const  unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email, displayName, photoURL } = user;
+        dispatch(addUser({ uid, email, displayName, photoURL }));
+        navigate("/browse");
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
+
     });
-  }
+    return()=> unsubscribe();
+   
+  }, [dispatch, navigate]); // Fixed missing dependencies
 
   return (
     <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between">
@@ -21,14 +43,18 @@ const Header = () => {
         alt="logo"
       />
 
-      <div className="flex p-2">
-        <img
-          alt="usericon"
-          src="/360_F_58787395_Rki4S1Q0wCgn5HeVbb9beMbyc8XCHrAZ.jpg"
-          className="w-16 h-12 rounded-full"
-        />
-        <button onClick={handleSignOut} className="font-bold text-white">(Sign Out)</button>
-      </div>
+      {user && (
+        <div className="flex p-2">
+          <img
+            alt="usericon"
+            src={user?.photoURL}
+            className="w-16 h-12 rounded-full"
+          />
+          <button onClick={handleSignOut} className="font-bold text-white">
+            (Sign Out)
+          </button>
+        </div>
+      )}
     </div>
   );
 };
